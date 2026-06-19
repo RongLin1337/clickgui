@@ -1,0 +1,230 @@
+# OpalClickGUI 使用文档
+
+Android Canvas 实现的 Minecraft 作弊客户端 ClickGUI，1:1 还原 HTML/CSS 版设计风格。
+
+## 项目介绍
+
+OpalClickGUI 是一个用 Android 原生 Canvas 绘制的 ClickGUI 界面，专为 Minecraft 作弊客户端设计。界面风格参考了现代客户端的设计，包含分类面板、模块开关、属性调节、功能列表、动态岛、通知系统等完整功能。
+
+## 功能特性
+
+### 核心功能
+- **7 大分类**：Combat（战斗）、Movement（移动）、Visual（视觉）、World（世界）、Player（玩家）、Exploit（漏洞）、Other（其他）
+- **丰富模块**：包含 Kill Aura、Velocity、Scaffold、Speed、Flight 等常用作弊模块
+- **属性调节**：支持开关、滑块、模式选择、主题网格等多种属性类型
+- **22 种主题色**：Opal、Spearmint、Jade Green、Rosy Pink、Magenta 等多种配色方案
+- **功能列表（ArrayList）**：右侧显示已开启的功能，带渐变文字和入场动画
+
+### 交互功能
+- **横向滚动**：分类面板支持左右滑动查看
+- **垂直滚动**：分类内模块支持上下滑动
+- **缩放调节**：双指缩放调整界面大小
+- **悬浮球（FAB）**：长按拖动，点击打开/关闭 GUI
+- **快捷键系统**：长按模块启用快捷键，可拖动快捷键按钮位置，长按缩放动画反馈
+- **背景图片**：支持自定义背景图片
+- **模块开关控制**：Dynamic Island 和 ArrayList 可在 Visual 分类中单独开关
+
+### 视觉效果
+- **动态岛**：顶部显示 FPS、服务器信息等状态
+- **通知系统**：右下角通知，带动画效果
+- **HUD 显示**：左下角显示 FPS、BPS、坐标
+- **打开动画**：每次打开 GUI 都有分类面板依次展开的动画
+- **半透明遮罩**：打开 GUI 时背景变暗，突出界面
+- **ArrayList 动画**：新开启的功能从右往左滑入，带平滑让位效果
+
+## 使用说明
+
+### 打开/关闭 GUI
+- **方式一**：点击屏幕右下角的悬浮球（FAB）
+- **方式二**：通过代码调用 `clickGUIView.toggleGUI()`
+
+### 操作方式
+- **左右滑动**：在分类面板区域左右滑动，切换不同分类
+- **上下滑动**：在单个分类内上下滑动，查看更多模块
+- **点击模块**：开启/关闭对应功能
+- **点击模块名称右侧**：展开/收起属性面板
+- **双指缩放**：在 GUI 区域双指捏合/张开，调整界面缩放比例
+- **长按模块**：启用该模块的快捷键功能，会出现一个可拖动的快捷键按钮
+- **点击快捷键按钮**：快速切换对应模块的开启/关闭状态
+- **长按快捷键按钮**：触发缩放反馈后可拖动到任意位置
+- **拖动快捷键按钮**：长按后拖动，松手时不会误触发点击
+
+### 主题切换
+1. 进入 Visual（视觉）分类
+2. 找到 Theme 模块
+3. 展开属性面板，点击 Color 属性
+4. 在主题网格中选择喜欢的主题色
+
+### 背景图片自定义
+1. 将背景图片命名为 `bg_image.png`
+2. 放到 `res/drawable/` 目录下
+3. 应用启动时会自动加载并设置为背景
+
+## 集成说明
+
+### 基本集成
+```java
+// 创建 ClickGUIView
+ClickGUIView clickGUIView = new ClickGUIView(this);
+
+// 添加到布局
+FrameLayout layout = new FrameLayout(this);
+layout.addView(clickGUIView);
+setContentView(layout);
+```
+
+### 设置背景图片
+```java
+Bitmap bgBitmap = BitmapFactory.decodeResource(getResources(), R.drawable.bg_image);
+clickGUIView.setBackgroundBitmap(bgBitmap);
+clickGUIView.setBackgroundImageEnabled(true);
+```
+
+### 控制 GUI 显示
+```java
+// 打开/关闭 GUI
+clickGUIView.toggleGUI();
+
+// 检查是否打开
+boolean isOpen = clickGUIView.isGuiOpen();
+```
+
+### 发送通知
+```java
+clickGUIView.showNotif("标题", "内容");
+```
+
+## 文件结构
+
+```
+OpalClickGUI/
+├── app/
+│   ├── build.gradle
+│   ├── proguard-rules.pro
+│   └── src/main/
+│       ├── AndroidManifest.xml
+│       ├── java/com/opal/clickgui/
+│       │   ├── MainActivity.java          // 主 Activity，承载 ClickGUI
+│       │   ├── model/
+│       │   │   ├── Category.java          // 分类模型
+│       │   │   ├── Module.java            // 模块模型
+│       │   │   ├── Property.java          // 属性模型
+│       │   │   └── Theme.java             // 主题模型
+│       │   └── view/
+│       │       └── ClickGUIView.java      // 核心绘制类，所有 UI 逻辑都在这里
+│       └── res/
+│           ├── drawable/
+│           │   └── bg_image.png           // 背景图片（需自行添加）
+│           ├── mipmap-anydpi-v26/
+│           └── values/
+│               ├── colors.xml
+│               ├── strings.xml
+│               └── themes.xml
+├── build.gradle
+├── gradle/
+├── gradle.properties
+└── settings.gradle
+```
+
+## 核心类说明
+
+### ClickGUIView
+核心绘制类，所有 UI 逻辑都在这个类中。
+
+**主要方法：**
+- `toggleGUI()`：切换 GUI 显示/隐藏
+- `isGuiOpen()`：检查 GUI 是否打开
+- `setBackgroundBitmap(Bitmap)`：设置背景图片
+- `setBackgroundImageEnabled(boolean)`：启用/禁用背景图片
+- `showNotif(String title, String content)`：显示通知
+
+**可调节常量（在类顶部修改）：**
+- `S`：全局缩放因子，默认 3.0f
+- `MIN_SCALE`：最小缩放比例，默认 2.0f
+- `MAX_SCALE`：最大缩放比例，默认 3.2f
+- `FAB_SIZE`：悬浮球大小，默认 36f
+- `FAB_LONG_PRESS_MS`：悬浮球长按触发时间，默认 300ms
+- `KEY_BTN_W`：快捷键按钮宽度，默认 50f
+- `KEY_BTN_H`：快捷键按钮高度，默认 24f
+- `KEY_BTN_RADIUS`：快捷键按钮圆角，默认 12f
+- `MODULE_LONG_PRESS_MS`：模块长按触发时间，默认 400ms
+- `KEY_LONG_PRESS_MS`：快捷键长按触发时间，默认 300ms
+
+### Module
+模块模型类，包含模块的名称、状态、属性等信息。
+
+**关键字段：**
+- `name`：模块名称
+- `on`：是否开启
+- `props`：属性列表
+- `expanded`：属性面板是否展开
+- `keyEnabled`：快捷键是否启用
+- `keyX` / `keyY`：快捷键按钮位置
+
+### Category
+分类模型类，包含分类名称、图标、模块列表等。
+
+### Property
+属性模型类，支持多种属性类型：
+- `TYPE_BOOL`：开关类型
+- `TYPE_SLIDER`：滑块类型
+- `TYPE_MODE`：模式选择类型
+- `TYPE_THEME`：主题网格类型
+
+## 自定义修改
+
+### 修改默认缩放
+在 `ClickGUIView.java` 中找到：
+```java
+private static final float S = 3.0f;
+```
+修改数值即可调整整体大小。
+
+### 修改悬浮球样式
+在 `ClickGUIView.java` 中找到 `drawFAB()` 函数，修改绘制逻辑。
+
+### 添加新模块
+在 `ClickGUIView.java` 的 `initData()` 函数中，找到对应分类，添加新的 Module 对象。
+
+### 添加新主题
+在 `Theme.java` 中添加新的 Theme 对象，包含名称和两个颜色值。
+
+## 注意事项
+
+1. **性能优化**：界面使用 Canvas 绘制，模块数量过多可能影响帧率，建议控制在合理范围内
+2. **内存管理**：背景图片如果过大，可能导致内存溢出，建议适当压缩
+3. **兼容性**：最低支持 Android 5.0 (API 21)
+4. **沉浸式**：默认使用全屏沉浸式模式，需要配合主题设置
+
+## 版本历史
+
+### v1.0
+- 初始版本，完整还原 HTML/CSS 版 ClickGUI
+- 支持 7 大分类，数十个模块
+- 22 种主题色
+- 悬浮球、通知、动态岛等功能
+
+### v1.1
+- 优化界面比例，调整默认缩放
+- 修复右侧显示不完全的问题
+- 优化悬浮球交互，支持长按拖动
+- 添加快捷键功能
+- 添加背景图片自定义
+- 优化 ArrayList 样式和排序
+
+### v1.2
+- 删除搜索栏，简化界面
+- 添加每次打开 GUI 的动画效果
+- 添加半透明黑色遮罩
+- 优化 ArrayList 入场动画
+- 降低背景透明度，优化圆角
+
+### v1.3
+- Visual 分类添加 Dynamic Island 和 ArrayList 模块开关
+- Player 分类图标替换为棋子风格
+- 优化快捷键：尺寸调小、圆角加大、文本垂直居中对齐
+- 快捷键添加长按缩放动画反馈
+- 修复快捷键拖动松手误触发点击的问题
+- 修复多属性模块的属性重叠问题（如 ESP、Auto Clicker 等）
+- 优化属性标签文本垂直对齐，与开关/滑块精准对齐
+- 黑色遮罩移至分类面板下方，只变暗背景
